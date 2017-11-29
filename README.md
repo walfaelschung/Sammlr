@@ -2,7 +2,13 @@
 Python scripts to collect data from the Facebook API and calculate networks of page likes, mutually liked pages, user overlap, and content overlap
 
 What the scripts does:
-- 
+- Sammlr uses the feed of a public Facebook page, to collect data from each post (e.g. status update, photo, video, etc.), all(!) comments made on that posts and all(!) reactions (e.g. like, love, hate, etc.). You can either specify a number of posts to collect or a date range. This data is stored as a comma-separated file on your drive and contains in each row info about the page's ID, page's name, unique user id (user name is not stored for privacy reasons), the type (of post, comment, reaction), a timestamp, and where applicable a permanent link to the post and the posts' or comments' message.
+- So Sammlr is just another Facebook data collection tool, yeah, you got it! But wait, there's more to it: If you choose to collect data on a network of pages, Sammlr will provide the csv files with raw data, but in addition calculate four types of networks between these pages
+  1) A network of unique user overlap, in which the weighted edges (links) between each pair of nodes (pages) are the number of users that were active (i.e. posting, commenting, or reacting) on both pages.
+  2) A network of unique content overlap, in which the weighted edges (links) between each pair of nodes (pages) are the number of pieces of content (photos, videos, newspaper articles, basically everything with a hyperlink) that were either posted or mentioned in a comment in both of the pages' feed.
+  3) Optional (as it takes some time): A network of page likes between the selected pages. This network is unweighted and directed.
+  4) Optional (as it takes some time): A network of the overlap of any pages liked by the selected pages or pages, by which the selected pages were liked. This means a network in which the number of common friends (pages) are the weighted edges between each par of nodes.
+- These networks are stored as simple edgelist to be processed with any network analysis package of choice, as well as a *.graphml-file, that can easily be opened with popular free network visualization software like Gephi and is easy to read with common network analysis packages like igraph (R,Python) or networkx (Python). 
 
 What you need before you can start:
 - You will need to register as a Facebook developer to gain access to the Facebook Graph API (https://developers.facebook.com/tools/explorer) - from there, you can get the access token needed by the Sammlr application.
