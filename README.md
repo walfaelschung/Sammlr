@@ -55,7 +55,9 @@ To use Sammlr,
 ## Copyrights ##
 
 What licenses apply:
-- GPLv3
+- CC-BY-NC-4.0
+Creative Commons License for non-commercial use
+https://creativecommons.org/licenses/by-nc/4.0/legalcode
 
 ## Contributors: ##
 - All code written and poorly tested by Matthias Hoffmann with help by machinaeXphilip. For the construction of a network of content overlap between the pages, we rely on a regular expression to detect hyperlinks in strings, that was written by Diego Perini (https://gist.github.com/dperini/729294).
