@@ -16,7 +16,7 @@ What you need before you can start:
 - Sammlr is written in Python 3, so make sure you have a Python environment installed
 
 
-## Requirements ##
+## Dependencies ##
 *(What libraries Sammlr uses:)*
 
 Our scripts are still work in progress and depend on functions from a number of other libraries (most of them pretty common, but if your Python installation is missing any of these, install them before running our script
