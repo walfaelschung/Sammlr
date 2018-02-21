@@ -1,6 +1,8 @@
 # Sammlr
 Python scripts to collect data from the Facebook API and calculate networks of page likes, mutually liked pages, user overlap, and content overlap
 
+UPDATE February 2018: As the Facebook API no longer seems to allow the unique identification of users, Sammlr is not able to compute a network of user-overlap anymore. Reactions are also not retrieved any more. The only networks you will get and that still work is content overlap, page likes, and common friends. The updated script file is still a bit rough, but should get the job done.
+
 ## What the scripts does: ##
 - Sammlr uses the feed of a public Facebook page, to collect data from each post (e.g. status update, photo, video, etc.), all(!) comments made on that posts and all(!) reactions (e.g. like, love, hate, etc.). You can either specify a number of posts to collect or a date range. This data is stored as a comma-separated file on your drive and contains in each row info about the page's ID, page's name, unique user id (user name is not stored for privacy reasons), the type (of post, comment, reaction), a timestamp, and where applicable a permanent link to the post and the posts' or comments' message.
 - So Sammlr is just another Facebook data collection tool, yeah, you got it! But wait, there's more to it: If you choose to collect data on a network of pages, Sammlr will provide the csv files with raw data, but in addition calculate four types of networks between these pages
