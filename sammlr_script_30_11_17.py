@@ -47,10 +47,11 @@ def depthone(token,seed):
     for page in a:
         getlikes(token,str(page["targetid"]))
 # open the first file manually
-    k = pandas.read_csv("likenetwork_"+seed+".csv", header=0, sep=";")
+    dtype_dic= {'sourceid': str, 'sourcename' : str, "targetid" : str, "targetname" : str}
+    k = pandas.read_csv("likenetwork_"+seed+".csv", header=0, sep=";", dtype = dtype_dic)
 # and append every following file
     for page in a:
-        l = pandas.read_csv("likenetwork_"+page["targetid"]+".csv", header=0, sep=";")
+        l = pandas.read_csv("likenetwork_"+page["targetid"]+".csv", header=0, sep=";", dtype = dtype_dic)
         k = k.append (l, ignore_index=True)
 
     k.to_csv("likenetwork_depth_one_"+seed+".csv", index=False, sep= ";",encoding='utf-8')
@@ -62,9 +63,10 @@ def getlikenetwork (idlist, token):
     for seed in idlist:
         print("Fetching page likes for page with ID "+seed)
         depthone (token,seed)
-    p = pandas.read_csv("likenetwork_depth_one_"+seed+".csv", header=0, sep=";")
+    dtype_dic= {'sourceid': str, 'sourcename' : str, "targetid" : str, "targetname" : str}
+    p = pandas.read_csv("likenetwork_depth_one_"+seed+".csv", header=0, sep=";", dtype = dtype_dic)
     for page in idlist:
-        o = pandas.read_csv("likenetwork_depth_one_"+page+".csv", header=0, sep=";")
+        o = pandas.read_csv("likenetwork_depth_one_"+page+".csv", header=0, sep=";", dtype = dtype_dic)
         p = p.append (o, ignore_index=True)
     p.to_csv("likenetwork_merged.csv", index=False, sep= ";", encoding='utf-8')
 
@@ -347,7 +349,7 @@ def parsedata_first(datalist, seed,namelist):
 # dealing with comments
             if "comments" in post:
                 for comment in post["comments"]["data"]:
-                    zeile = {"id":comment["from"]["id"],"name":comment["from"]["name"],"time":comment["created_time"],"type":"comment", "permalink":"", "link":"","message":comment["message"]}
+                    zeile = {"id":comment["id"],"name":comment["id"],"time":comment["created_time"],"type":"comment", "permalink":"", "link":"","message":comment["message"]}
                     list.append(zeile)
 
 # dealing with reactions
@@ -388,7 +390,7 @@ def parsedata(datalist, seed,namelist):
 # dealing with comments
             if "comments" in post:
                 for comment in post["comments"]["data"]:
-                    zeile = {"id":comment["from"]["id"],"name":comment["from"]["name"],"time":comment["created_time"],"type":"comment", "permalink":"", "link":"","message":comment["message"]}
+                    zeile = {"id":comment["id"],"name":comment["id"],"time":comment["created_time"],"type":"comment", "permalink":"", "link":"","message":comment["message"]}
                     list.append(zeile)
 
 # dealing with reactions
@@ -571,113 +573,113 @@ def change_id(idlist, userids):
 
 
 def networks(idlist, token):
-    print ("Let me calculate a network of co-usership between the pages you provided...")
-    pageids = []
-    userids = []
-    udict = {}
-    actdict = {}
-    cdict = {}
-    pdict = {}
-    rdict = {}
-    ids = idlist
-    for i in ids:
-        if os.path.isfile("posts_from_"+i+".csv"):
-
-            with open ("posts_from_"+i+".csv", encoding="utf-8") as file:
-                readCSV = csv.reader((x.replace('\0', '') for x in file), delimiter=';')
-                next(readCSV)
-                rows = 0
-                typesof = []
-                users = []
-                for row in readCSV:
-                    pageid=row[0]
-                    userid=row[2]
-                    typeof=row[4]
-                    pageids.append(pageid)
-                    userids.append(userid)
-                    users.append(userid)
-                    typesof.append(typeof)
-                    rows = rows+1
-                udict.update({i: len(set(users))})
-                actdict.update({i: rows})
-                cdict.update({i: typesof.count("comment")})
-                pdict.update({i: typesof.count("status") + typesof.count("photo") + typesof.count("video") + typesof.count("link") + typesof.count("event")})
-                rdict.update({i: typesof.count("LIKE") + typesof.count("SAD") + typesof.count("HAHA") + typesof.count("LOVE") + typesof.count("ANGRY")+ typesof.count("WOW")})
-
-        else:
-            print("The Facebook ID"+i+"has no matching file in the working directory. Has data been collected correctly?")
-
-
-    print("Handled "+str(len(actdict))+" page IDs.")
-
-    # trim idlist and dicts for empty entries:
-    actdict = {k: v for k, v in actdict.items() if v != 0}
-    ids = list(actdict.keys())
-    udict = {k: v for k, v in udict.items() if k in ids}
-    cdict = {k: v for k, v in cdict.items() if k in ids}
-    pdict = {k: v for k, v in pdict.items() if k in ids}
-    rdict = {k: v for k, v in rdict.items() if k in ids}
-# the problem is: admin and page_id are identical: when admin from page A posts on page B,
-# the graph is not strictly bipartite anymore, as now we do not ONLY have user-page connection,
-# but page-page connection.
-# those users that are page_admins (i.e. have the same user_id as page_id) will get little "admin" remark
-# and applied it:
-    userids = change_id(ids, userids)
-# write out to a bipartite edgelist
-    with open("edgelist_user.csv", "w", newline='', encoding="utf-8") as file:
-            writer = csv.writer(file, delimiter=";")
-            writer.writerow(["Source","Target"])
-            for i in range(len(userids)):
-
-                writer.writerow([userids[i], pageids[i]])
-
+#    print ("Let me calculate a network of co-usership between the pages you provided...")
+#    pageids = []
+#    userids = []
+#    udict = {}
+#    actdict = {}
+#    cdict = {}
+#    pdict = {}
+#    rdict = {}
+#    ids = idlist
+#    for i in ids:
+#        if os.path.isfile("posts_from_"+i+".csv"):
 #
-    dicti = []
-    for i in range(len(userids)):
-        zeile = (userids[i], pageids[i])
-        dicti.append(zeile)
-
-# and get us our networks:
-
-    G=nx.MultiGraph()
-    G.add_edges_from(dicti)
-    for u,v,data in G.edges(data=True):
-        w = data['weight'] = 1.0
-        G.edges(data=True)
-
-    H = nx.Graph()
-    for u,v,data in G.edges(data=True):
-        w = data['weight']
-        if H.has_edge(u,v):
-            H[u][v]['weight'] += w
-        else:
-           H.add_edge(u, v, weight=w)
-#    H.edges(data=True)
-#    H.is_directed()
-#    nx.is_bipartite(H)
-    F = bipartite.weighted_projected_graph(H, ids, ratio=False)
-    nx.set_node_attributes(F, actdict, 'total_activities')
-    nx.set_node_attributes(F, udict, 'unique_users')
-    nx.set_node_attributes(F, cdict, 'comments')
-    nx.set_node_attributes(F, pdict, 'posts')
-    nx.set_node_attributes(F, rdict, 'reactions')
-    elist = list(F.edges())
-    for i in elist:
-        F[i[0]][i[1]]['sfrac'] = F[i[0]][i[1]]['weight'] / udict.get(i[0])
-        F[i[0]][i[1]]['tfrac'] = F[i[0]][i[1]]['weight'] / udict.get(i[1])
-        if F[i[0]][i[1]]['sfrac'] < F[i[0]][i[1]]['tfrac']:
-            F[i[0]][i[1]]['maxfrac'] = F[i[0]][i[1]]['sfrac']
-        else:
-            F[i[0]][i[1]]['maxfrac'] = F[i[0]][i[1]]['tfrac']
-    pagenames = []
-    for i in ids:
-        a = getpageinfo(token,i)
-        pagenames.append (a["name"])
-    mapping = dict(zip(ids, pagenames))
-    F=nx.relabel_nodes(F,mapping)
-    nx.write_graphml(F, "user_projection_pages.graphml")
-    nx.write_weighted_edgelist(F, 'user_projection_edgelist.csv', delimiter=";", encoding="utf-8")
-    print("Done with the user-overlap - You'll find a weighted edgelist in csv-format and a graphml-file in your working directory.")
+#            with open ("posts_from_"+i+".csv", encoding="utf-8") as file:
+#                readCSV = csv.reader((x.replace('\0', '') for x in file), delimiter=';')
+#                next(readCSV)
+#                rows = 0
+#                typesof = []
+#                users = []
+#                for row in readCSV:
+#                    pageid=row[0]
+#                    userid=row[2]
+#                    typeof=row[4]
+#                    pageids.append(pageid)
+#                    userids.append(userid)
+#                    users.append(userid)
+#                    typesof.append(typeof)
+#                    rows = rows+1
+#                udict.update({i: len(set(users))})
+#                actdict.update({i: rows})
+#                cdict.update({i: typesof.count("comment")})
+#                pdict.update({i: typesof.count("status") + typesof.count("photo") + typesof.count("video") + typesof.count("link") + typesof.count("event")})
+#                rdict.update({i: typesof.count("LIKE") + typesof.count("SAD") + typesof.count("HAHA") + typesof.count("LOVE") + typesof.count("ANGRY")+ typesof.count("WOW")})
+#
+#        else:
+#            print("The Facebook ID"+i+"has no matching file in the working directory. Has data been collected correctly?")
+#
+#
+#    print("Handled "+str(len(actdict))+" page IDs.")
+#
+#    # trim idlist and dicts for empty entries:
+#    actdict = {k: v for k, v in actdict.items() if v != 0}
+#    ids = list(actdict.keys())
+#    udict = {k: v for k, v in udict.items() if k in ids}
+#    cdict = {k: v for k, v in cdict.items() if k in ids}
+#    pdict = {k: v for k, v in pdict.items() if k in ids}
+#    rdict = {k: v for k, v in rdict.items() if k in ids}
+## the problem is: admin and page_id are identical: when admin from page A posts on page B,
+## the graph is not strictly bipartite anymore, as now we do not ONLY have user-page connection,
+## but page-page connection.
+## those users that are page_admins (i.e. have the same user_id as page_id) will get little "admin" remark
+## and applied it:
+#    userids = change_id(ids, userids)
+## write out to a bipartite edgelist
+#    with open("edgelist_user.csv", "w", newline='', encoding="utf-8") as file:
+#            writer = csv.writer(file, delimiter=";")
+#            writer.writerow(["Source","Target"])
+#            for i in range(len(userids)):
+#
+#                writer.writerow([userids[i], pageids[i]])
+#
+##
+#    dicti = []
+#    for i in range(len(userids)):
+#        zeile = (userids[i], pageids[i])
+#        dicti.append(zeile)
+#
+## and get us our networks:
+#
+#    G=nx.MultiGraph()
+#    G.add_edges_from(dicti)
+#    for u,v,data in G.edges(data=True):
+#        w = data['weight'] = 1.0
+#        G.edges(data=True)
+#
+#    H = nx.Graph()
+#    for u,v,data in G.edges(data=True):
+#        w = data['weight']
+#        if H.has_edge(u,v):
+#            H[u][v]['weight'] += w
+#        else:
+#           H.add_edge(u, v, weight=w)
+##    H.edges(data=True)
+##    H.is_directed()
+##    nx.is_bipartite(H)
+#    F = bipartite.weighted_projected_graph(H, ids, ratio=False)
+#    nx.set_node_attributes(F, actdict, 'total_activities')
+#    nx.set_node_attributes(F, udict, 'unique_users')
+#    nx.set_node_attributes(F, cdict, 'comments')
+#    nx.set_node_attributes(F, pdict, 'posts')
+#    nx.set_node_attributes(F, rdict, 'reactions')
+#    elist = list(F.edges())
+#    for i in elist:
+#        F[i[0]][i[1]]['sfrac'] = F[i[0]][i[1]]['weight'] / udict.get(i[0])
+#        F[i[0]][i[1]]['tfrac'] = F[i[0]][i[1]]['weight'] / udict.get(i[1])
+#        if F[i[0]][i[1]]['sfrac'] < F[i[0]][i[1]]['tfrac']:
+#            F[i[0]][i[1]]['maxfrac'] = F[i[0]][i[1]]['sfrac']
+#        else:
+#            F[i[0]][i[1]]['maxfrac'] = F[i[0]][i[1]]['tfrac']
+#    pagenames = []
+#    for i in ids:
+#        a = getpageinfo(token,i)
+#        pagenames.append (a["name"])
+#    mapping = dict(zip(ids, pagenames))
+#    F=nx.relabel_nodes(F,mapping)
+#    nx.write_graphml(F, "user_projection_pages.graphml")
+#    nx.write_weighted_edgelist(F, 'user_projection_edgelist.csv', delimiter=";", encoding="utf-8")
+#    print("Done with the user-overlap - You'll find a weighted edgelist in csv-format and a graphml-file in your working directory.")
 
 
     print ("Let me calculate a network of content overlap between the pages you provided...")
@@ -723,6 +725,7 @@ def networks(idlist, token):
     cdict = {}
     pdict = {}
     rdict = {}
+    ids = idlist
     for i in ids:
         linkids = []
         messageids = []
@@ -765,7 +768,7 @@ def networks(idlist, token):
      # trim idlist and dicts for empty entries:
     actdict = {k: v for k, v in actdict.items() if v != 0}
     ids = list(actdict.keys())
-    udict = {k: v for k, v in udict.items() if k in ids}
+#    udict = {k: v for k, v in udict.items() if k in ids}
     cdict = {k: v for k, v in cdict.items() if k in ids}
     pdict = {k: v for k, v in pdict.items() if k in ids}
     rdict = {k: v for k, v in rdict.items() if k in ids}
@@ -793,10 +796,10 @@ def networks(idlist, token):
     #    H.is_directed()
     #    nx.is_bipartite(H)
     F = bipartite.weighted_projected_graph(H, ids, ratio=False)
-    nx.set_node_attributes(F, actdict, 'total_activities')
-    nx.set_node_attributes(F, cdict, 'comments')
-    nx.set_node_attributes(F, pdict, 'posts')
-    nx.set_node_attributes(F, rdict, 'reactions')
+    nx.set_node_attributes(F, 'total_activities', actdict)
+    nx.set_node_attributes(F, 'comments', cdict)
+    nx.set_node_attributes(F, 'posts', pdict)
+    nx.set_node_attributes(F, 'reactions', rdict)
     elist = list(F.edges())
     for i in elist:
         F[i[0]][i[1]]['sfrac'] = F[i[0]][i[1]]['weight'] / idict.get(i[0])
@@ -926,6 +929,6 @@ def user(token, idlist):
 
     else:
         print("Bye, thanks for using Sammlr.")
-#%%
+  #%%
 
 main()
