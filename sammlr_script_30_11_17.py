@@ -129,8 +129,38 @@ def getlikenetwork (idlist, token):
     F=nx.relabel_nodes(F,mapping)
     nx.write_graphml(F, "allies_network_pages.graphml")
     nx.write_weighted_edgelist(F, 'allies_network_edgelist.csv', delimiter=";", encoding="utf-8")
-    print("Done with the allies (page like overlap) - You'll find an edgelist in csv-format and a graphml-file in your working directory.")
+    print("Done with the allies (page like overlap) - You'll find an edgelist in csv-format and a graphml-file in your working directory.")    
+    print("You can add metadata (category, description, etc.) to every node of your page like network.")
+    print("This does take time, so please choose if you want to [c]ollect metadata for each page or [s]kip:"),
+    prompt = '>'
+    skp = set(['skip','s'])
+    cllct = set(['collect','c'])
+    cors = input(prompt).lower()
+    if cors in skp:
+        pass
+    if cors in cllct:
+        print ("Okay, let us collect aditional data:")
+       
+        for page in idlist:
+            infolist = []
 
+            o = pandas.read_csv("likenetwork_depth_one_"+page+".csv", header=0, sep=";")
+            newlist = list(o.targetid)
+            newlist.append(page)
+            newlist = list(set(newlist))
+            for newid in newlist:
+                information = getpageinfo(token,str(newid))
+                print("Collecting additional information on page "+str(newid))
+                line = {"id":information["id"],"name":information["name"],"category":information["category"],"description":"about","fans":information["fan_count"],"talked_about":information["talking_about_count"],"rating":information["rating_count"]}
+                if "about" in information:
+                    line["description"] = information["about"]
+                else: pass    
+                infolist.append(line)
+            with open("metadate_for_likenetwork_of_"+page+".csv","a", newline='', encoding="utf-8") as file:
+                writer = csv.writer(file, delimiter=";")
+                writer.writerow(["id","name","category","description","fans","talked_about","rating"])
+                for entry in infolist:
+                    writer.writerow([entry["id"], entry["name"], entry["category"], entry["description"], entry["fans"], entry["talked_about"], entry["rating"]])
 
 
 #%%
